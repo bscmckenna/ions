@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+    }
+
+    #quiz-container {
+      max-width: 700px;
+      margin: 0 auto;
+      background-color: #fff;
+      border: 1px solid #ccc;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      color: #1d91b3;
+      text-align: center;
+    }
+
+    #question-container {
+      text-align: center;
+    }
+
+    #ion-name {
+      font-size: 18px;
+      color: #0c3868;
+    }
+
+    #input-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    input {
+      width: 90%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 28px;
+    }
+
+    #button-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .button-row {
+      display: flex;
+      justify-content: space-between; /* Spreads buttons apart */
+      align-items: center; /* Aligns buttons vertically in the center */
+      margin: 10px 0;
+    }
+
+    .button-container {
+      display: flex;
+      align-items: center; /* Aligns elements within a container vertically in the center */
+    }
+
+    .button-container button {
+      background-color: #1d91b3;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+    }
+
+    .button-container button:hover {
+      background-color: #0c3868;
+    }
+
+    .selected {
+      background-color: #0c3868;
+    }
+
+    #start-button {
+      background-color: #1d91b3;
+      color: white;
+      font-size: 48pt;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      display: inline-block; /* Display the button as a block element */
+      padding: 20px 40px; /* Adjust the padding to make it larger */
+    }
+
+    #start-button:hover {
+      background-color: #0c3868;
+    }
+
+    #start-button-container {
+      display: flex;
+      justify-content: center; /* Center horizontally */
+      align-items: center; /* Center vertically */
+      height: 100%; /* Make the container fill the height of the screen */
+    }
+
+    #feedback-container {
+      margin-top: 20px;
+    }
+
+    #feedback-message {
+      font-size: 16px;
+      color: #333;
+    }
+
+    .toggle-button {
+      background-color: #1d91b3;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .toggle-button:hover {
+      background-color: #0056b3;
+    }
+
+    #periodic-table-toggle-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .hidden-timer {
+      display: none; /* Initially hidden */
+      font-size: 30px;
+      text-align: center;
+    }
+
+    #feedback-message {
+      font-size: 18pt;
+      text-align: center;
+    }
+
+    .school-logo {
+      width: 233px;
+      height: 95px;
+    }
+
+  </style>
+  <link rel="icon" type="image/png" href="https://www.byfordsc.wa.edu.au/wp-content/uploads/2021/06/favicon.png">
+</head>
+<body>
+  <div id="quiz-container">
+    <div class="logo-container">
+      <img src="https://www.byfordsc.wa.edu.au/wp-content/uploads/2021/06/logo.png" alt="School Logo" class="school-logo">
+    </div>
+    <h1>Chemistry Ion Quiz</h1>
+
+
+    <div id="header-row" class="button-row">
+      <div class="button-container">
+        <label for="question-set">Question Set:</label>
+        <select id="question-set" onchange="selectQuestionSet()">
+          <option value="ion-symbols" selected>Ion Symbols</option>
+          <option value="ion-names">Ion Names</option>
+          <option value="combining-ions">Combining Ions</option>
+          <option value="compound-formula">Compound Formula</option>
+          <option value="compound-names">Compound Names</option>
+        </select>
+      </div>
+      <div id="score-display" style="float: right;">
+        Correct: 0 | Incorrect: 0 | Streak: 0
+      </div>
+    </div>
+
+    <div id="button-row" class="button-row">
+      <div class="button-container">
+        <button id="endless-button" class="selected" onclick="selectMode('endless')">Endless</button>
+        <button id="time-attack-button" onclick="selectMode('time-attack')">Time Attack</button>
+        <button id="quiz-button" onclick="selectMode('quiz')" style="display: none;">Quiz</button>
+      </div>
+      <div class="button-container" id="periodic-table-button">
+        <button id="periodic-table-toggle" class="toggle-button" onclick="togglePeriodicTable()">Periodic Table</button>
+      </div>
+    </div>
+    <div id="time-attack-section" style="display: none;">
+      <div id="start-button-container">
+        <button id="start-button" class="toggle-button" onclick="startTimeAttack()">Start</button>
+      </div>
+      <div id="countdown" class="hidden-timer">60.00</div>
+    </div>
+    <div id="questions-container">
+      <div id="periodic-table-container" style="display: none;">
+        <img src="https://i.imgur.com/IfTsP98.png" alt="Periodic Table" id="periodic-table-image" style="width: 100%;">
+      </div>
+      <div id="question-container">
+        <p id="ion-name">Write the formula for the potassium ion:</p>
+      </div>
+      <div id="input-container">
+        <input type="text" id="formula-input" placeholder="Formula">
+        <input type="text" id="charge-input" placeholder="Charge">
+        <input type="text" id="name-input" style="display: none;" placeholder="Name">
+        <button id="check-button" class="button-container button" style="display: inline;">Check</button>
+        <button id="next-button" class="button-container button" style="display: none;">Next</button>
+      </div>
+      <div id="feedback-container">
+        <p id="feedback-message"></p>
+      </div>
+    </div>
+  </div>
+
+
+
+  <script>
+    const ions = [
+    { name: "ammonium", formula: "NH4", charge: "+", type: "cation", polyatomic: true },
+    { name: "caesium", formula: "Cs", charge: "+", type: "cation", polyatomic: false },
+    { name: "hydrogen", formula: "H", charge: "+", type: "cation", polyatomic: false },
+    { name: "lithium", formula: "Li", charge: "+", type: "cation", polyatomic: false },
+    { name: "potassium", formula: "K", charge: "+", type: "cation", polyatomic: false },
+    { name: "rubidium", formula: "Rb", charge: "+", type: "cation", polyatomic: false },
+    { name: "silver", formula: "Ag", charge: "+", type: "cation", polyatomic: false },
+    { name: "sodium", formula: "Na", charge: "+", type: "cation", polyatomic: false },
+    { name: "barium", formula: "Ba", charge: "2+", type: "cation", polyatomic: false },
+    { name: "calcium", formula: "Ca", charge: "2+", type: "cation", polyatomic: false },
+    { name: "cobalt(II)", formula: "Co", charge: "2+", type: "cation", polyatomic: false},
+    { name: "copper(II)", formula: "Cu", charge: "2+", type: "cation", polyatomic: false },
+    { name: "iron(II)", formula: "Fe", charge: "2+", type: "cation", polyatomic: false },
+    { name: "lead(II)", formula: "Pb", charge: "2+", type: "cation", polyatomic: false },
+    { name: "magnesium", formula: "Mg", charge: "2+", type: "cation", polyatomic: false },
+    { name: "manganese(II)", formula: "Mn", charge: "2+", type: "cation", polyatomic: false },
+    { name: "nickel(II)", formula: "Ni", charge: "2+", type: "cation", polyatomic: false },
+    { name: "strontium", formula: "Sr", charge: "2+", type: "cation", polyatomic: false },
+    { name: "zinc", formula: "Zn", charge: "2+", type: "cation", polyatomic: false },
+    { name: "aluminium", formula: "Aℓ", charge: "3+", type: "cation", polyatomic: false },
+    { name: "chromium(III)", formula: "Cr", charge: "3+", type: "cation", polyatomic: false },
+    { name: "iron(III)", formula: "Fe", charge: "3+", type: "cation", polyatomic: false },
+    { name: "bromide", formula: "Br", charge: "-", type: "anion", polyatomic: false },
+    { name: "chloride", formula: "Cℓ", charge: "-", type: "anion", polyatomic: false },
+    { name: "dihydrogenphosphate", formula: "H2PO4", charge: "-", type: "anion", polyatomic: true },
+    { name: "ethanoate", formula: "CH3COO", charge: "-", type: "anion", polyatomic: true },
+    { name: "acetate", formula: "CH3COO", charge: "-", type: "anion", polyatomic: true },
+    { name: "fluoride", formula: "F", charge: "-", type: "anion", polyatomic: false },
+    { name: "hydrogencarbonate", formula: "HCO3", charge: "-", type: "anion", polyatomic: true },
+    { name: "hydrogensulfate", formula: "HSO4", charge: "-", type: "anion", polyatomic: true },
+    { name: "hydroxide", formula: "OH", charge: "-", type: "anion", polyatomic: false },
+    { name: "iodide", formula: "I", charge: "-", type: "anion", polyatomic: false },
+    { name: "nitrate", formula: "NO3", charge: "-", type: "anion", polyatomic: true },
+    { name: "carbonate", formula: "CO3", charge: "2-", type: "anion", polyatomic: true },
+    { name: "hydrogenphosphate", formula: "HPO4", charge: "2-", type: "anion", polyatomic: true },
+    { name: "oxide", formula: "O", charge: "2-", type: "anion", polyatomic: false },
+    { name: "sulfate", formula: "SO4", charge: "2-", type: "anion", polyatomic: true },
+    { name: "sulfide", formula: "S", charge: "2-", type: "anion", polyatomic: false },
+    { name: "nitride", formula: "N", charge: "3-", type: "anion", polyatomic: false},
+    { name: "phosphate", formula: "PO4", charge: "3-", type: "anion", polyatomic: true },
+    // { name: "oxalate", formula: "C2O4", charge: "2-", type: "anion", polyatomic: true },
+    // { name: "chromate", formula: "CrO4", charge: "2-", type: "anion", polyatomic: true },
+    // { name: "dichromate", formula: "Cr2O7", charge: "2-", type: "anion", polyatomic: true },
+    // { name: "permanganate", formula: "MnO4", charge: "-", type: "anion", polyatomic: true },
+    // { name: "sulfite", formula: "SO3", charge: "2-", type: "anion", polyatomic: true },
+    // { name: "nitrite", formula: "NO2", charge: "-", type: "anion", polyatomic: true },
+    ];
+
+    let currentQuestion;
+    let currentSet = 'ion-symbols';
+    let currentMode = 'endless';
+    let timeAttackTimer;
+    let isCorrect = false;
+    const formulaInput = document.getElementById("formula-input");
+    const chargeInput = document.getElementById("charge-input");
+    const nameInput = document.getElementById('name-input');
+    const checkButton = document.getElementById("check-button");
+    const timerText = document.getElementById("timer-text");
+    const feedbackMessage = document.getElementById("feedback-message");
+    const ionName = document.getElementById("ion-name");
+    const nextButton = document.getElementById("next-button");
+    const endlessButton = document.getElementById('endless-button');
+    const timeAttackButton = document.getElementById('time-attack-button');
+    const quizButton = document.getElementById('quiz-button');
+    const timeAttackSection = document.getElementById('time-attack-section');
+    const startButton = document.getElementById('start-button');
+    const countdown = document.getElementById('countdown');
+    const questionsContainer = document.getElementById('questions-container');
+
+    // Define variables to keep track of user's score
+    let correctAnswers = 0;
+    let incorrectAnswers = 0;
+    let streak = 0;
+    let maxStreak = 0;
+
+    checkButton.addEventListener("click", checkAnswer);
+    nextButton.addEventListener("click", nextQuestion);
+
+    // Function to update the score display
+    function updateScoreDisplay() {
+      const scoreDisplay = document.getElementById('score-display');
+      scoreDisplay.innerHTML = `Correct: ${correctAnswers} | Incorrect: ${incorrectAnswers} | Streak: ${streak}`;
+    }
+
+    function selectQuestionSet() {
+      const questionSetSelect = document.getElementById('question-set');
+      changeSet(questionSetSelect.value);
+    }
+
+    // Function to change between sets
+    function changeSet(set) {
+      resetScores();
+      resetTimeAttack();
+
+      currentSet = set;
+      const formulaInput = document.getElementById('formula-input');
+      const chargeInput = document.getElementById('charge-input');
+      const nameInput = document.getElementById('name-input');
+      const feedbackMessage = document.getElementById('feedback-message');
+      const checkButton = document.getElementById('check-button');
+      const nextButton = document.getElementById('next-button');
+
+      // Reset feedback message
+      feedbackMessage.innerHTML = '';
+
+      // Clear text inputs
+      formulaInput.value = '';
+      chargeInput.value = '';
+      nameInput.value = '';
+
+      // Show the "Check" button and hide the "Next" button
+      checkButton.style.display = 'inline';
+      nextButton.style.display = 'none';
+
+      setFocus();
+
+      // Automatically select a new question based on the selected question set
+      const selectedQuestionSet = document.getElementById('question-set').value;
+      currentQuestion = selectNextQuestion(selectedQuestionSet);
+      displayQuestion(currentQuestion);
+    }
+
+    function resetScores() {
+      correctAnswers = 0;
+      incorrectAnswers = 0;
+      streak = 0;
+      updateScoreDisplay();
+    }
+
+    function setFocus() {
+      if (currentSet === 'ion-symbols' ) {
+        // Set focus to the formula input
+        formulaInput.style.display = 'block';
+        chargeInput.style.display = 'block';
+        nameInput.style.display = 'none';
+        formulaInput.focus();
+      } else if (currentSet === 'compound-formula' || currentSet === 'combining-ions' ) {
+        // Set focus to the formula input
+        formulaInput.style.display = 'block';
+        chargeInput.style.display = 'none';
+        nameInput.style.display = 'none';
+        formulaInput.focus();
+      } else {
+        // Set focus to the name input
+        formulaInput.style.display = 'none';
+        chargeInput.style.display = 'none';
+        nameInput.style.display = 'block';
+        nameInput.focus();
+      }
+    }
+
+    function resetTimeAttack() {
+      if (currentMode === 'time-attack') {
+        timeAttackSection.style.display = 'block';
+        startButton.style.display = 'block';
+        countdown.style.display = 'none';
+        resetScores();
+        clearInterval(timeAttackTimer);
+        hideQuestions();
+        nextQuestion();
+      }
+    }
+
+    function startTimeAttack() {
+      showQuestions();
+      setFocus();
+      startButton.style.display = 'none';
+      countdown.style.display = 'block';
+
+      let timeLeft = 60.00; // Set the initial time in seconds
+      const interval = 10; // Update the timer every 10 milliseconds
+
+      timeAttackTimer = setInterval(function () {
+        timeLeft -= interval / 1000; // Decrement by 0.01 seconds (10 milliseconds)
+        countdown.textContent = timeLeft.toFixed(2); // Display with two decimal places
+
+        if (timeLeft <= 0) {
+          clearInterval(timeAttackTimer); // Stop the timer when it reaches 0
+          countdown.textContent = '0.00';
+          hideQuestions();
+          // Add code here to handle the end of the time attack mode
+        }
+      }, interval);
+    }
+
+    // Function to hide the questions
+    function hideQuestions() {
+      questionsContainer.style.display = 'none';
+    }
+
+    // Function to show the questions and reset mode
+    function showQuestions() {
+      questionsContainer.style.display = 'block';
+      updateScoreDisplay(); // Update the score display
+    }
+
+    // Function to display the final score
+    function displayFinalScore() {
+      const scoreDisplay = document.getElementById('score-display');
+      scoreDisplay.textContent = `Final Score: Correct: ${correctCount} | Incorrect: ${incorrectCount}`;
+
+      // Add a message indicating that time is up
+      const message = document.createElement('p');
+      message.textContent = 'Time is up!';
+
+      // Create a container for the message and button
+      const container = document.createElement('div');
+      container.appendChild(message);
+
+      // Add a "Play Again" button
+      const playAgainButton = document.createElement('button');
+      playAgainButton.textContent = 'Play Again';
+      playAgainButton.onclick = resetGame; // Define a function to reset the game when the button is clicked
+      container.appendChild(playAgainButton);
+
+      // Append the container to the score display
+      scoreDisplay.appendChild(container);
+    }
+
+    // Function to reset the game
+    function resetGame() {
+      hideFinalScore(); // Hide the final score display
+      showQuestions(); // Show the questions again, or any other initialization logic you need
+    }
+
+    // Function to hide the final score display
+    function hideFinalScore() {
+      const scoreDisplay = document.getElementById('score-display');
+      scoreDisplay.textContent = ''; // Clear the score display
+    }
+
+    // Shuffle the ions array for a random order of questions
+    shuffleArray(ions);
+
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    // Define variations of charges
+    const chargeVariations = {
+      "+": ["+1", "1+", "+"],
+      "-": ["-1", "1-", "-"],
+      "2-": ["-2", "2-"],
+      "3-": ["-3", "3-"],
+      "2+": ["+2", "2+"],
+      "3+": ["+3", "3+"],
+    };
+
+    // Define formula variations
+    const formulaVariations = {
+      "Aℓ": ["Al", "Aℓ"],
+      "Cℓ": ["Cl", "Cℓ"],
+    };
+
+    const ethanoateSynonyms = ["ethanoate", "acetate"];
+    const acetateSynonyms = ["ethanoate", "acetate"];
+
+    function checkAnswer() {
+      if (currentSet === 'compound-formula' || currentSet === 'compound-names'  || currentSet === 'combining-ions' ) {
+        // Check the answer for ionic compounds
+        checkIonicCompoundAnswer();
+      } else {
+        // Check the answer for ions
+        checkIonAnswer();
+      }
+      console.log(`Value of isCorrect in checkAnswer after checkIonAnswer: ${isCorrect}`)
+      // Generate feedback based on the result
+      generateFeedback();
+
+      // Show the "Next" button and hide the check button
+      nextButton.style.display = "inline";
+      checkButton.style.display = "none";
+
+      // Update counters based on correctness
+      if (isCorrect) {
+        correctAnswers++;
+        streak++;
+      } else {
+        incorrectAnswers++;
+        streak = 0;
+      }
+
+      // Display the updated score
+      updateScoreDisplay();
+    }
+
+    function checkIonAnswer() {
+      const correctIon = currentQuestion;
+
+      isCorrect = false;
+
+      if (currentSet === 'ion-names') {
+        const userInput = nameInput.value.trim();
+        const firstLetterLower = userInput.charAt(0).toLowerCase();
+        const userRest = userInput.slice(1);
+
+        // Remove leading/trailing spaces and " ion" (with a space) from user's input
+        const userTrimmed = (firstLetterLower + userRest).replace(/ ion$/, "");
+        const correctTrimmed = correctIon.name.trim();
+
+        // Check for synonyms
+        if (ethanoateSynonyms.includes(userTrimmed) && ethanoateSynonyms.includes(correctTrimmed)) {
+          isCorrect = true;
+        } else {
+          // Compare user answer and correct answer for ion names
+          isCorrect = userTrimmed === correctTrimmed;
+        }
+      } else if (currentSet === 'ion-symbols') {
+        const chargeInputValue = chargeInput.value.trim();
+        const formulaInputValue = formulaInput.value.trim();
+
+        // Check the charge
+        const chargeVariants = chargeVariations[correctIon.charge] || [];
+        isChargeCorrect = chargeVariants.includes(chargeInputValue);
+
+        // Check the formula
+        isFormulaCorrect = formulaInputValue === correctIon.formula;
+        if (!isFormulaCorrect) {
+          const formulaVariants = formulaVariations[correctIon.formula] || [];
+          isFormulaCorrect = formulaVariants.includes(formulaInputValue);
+        }
+
+        // Check if both charge and formula are correct
+        isCorrect = isChargeCorrect && isFormulaCorrect;
+      }
+    }
+
+    function checkIonicCompoundAnswer() {
+      console.log(currentQuestion);
+      let userInput = '';
+
+      if (currentSet === 'compound-names') {
+        userInput = nameInput.value.trim();
+      } else {
+        userInput = formulaInput.value.trim();
+      }
+
+      let correctAnswer = currentSet === 'compound-names' ? currentQuestion.name : currentQuestion.formula;
+      // Replace cursive "ℓ" with "l"
+      correctAnswer = correctAnswer.replace(/ℓ/g, 'l');
+
+      console.log(userInput);
+      console.log(correctAnswer);
+
+      // Replace "acetate" with "ethanoate" in correctAnswer and userInput
+      correctAnswer = correctAnswer.replace(/acetate/g, 'ethanoate');
+      userInput = userInput.replace(/acetate/g, 'ethanoate');
+
+      // Make the first letter of name lowercase
+      const userInputLower = currentSet === 'compound-names' ? userInput.charAt(0).toLowerCase() + userInput.slice(1) : userInput;
+
+      console.log(userInputLower);
+      console.log(correctAnswer);
+      // Compare the user input to the correct answer
+      isCorrect = userInputLower === correctAnswer;
+      console.log(isCorrect);
+      // Update feedback based on the result
+      generateFeedback(isCorrect);
+    }
+
+    function generateFeedback() {
+      let feedback;
+      if (isCorrect) {
+        feedback = "Correct!";
+      } else {
+        const name = currentQuestion.name;
+        const formula = formatSubscripts(currentQuestion.formula);
+        const charge = formatSuperscripts(currentQuestion.charge || '');
+
+        if (currentSet === 'ion-symbols') {
+          feedback = formatSentenceStart(name) + " ion is " + formula + charge;
+        } else if (currentSet === 'compound-formula' || currentSet === 'combining-ions') {
+          feedback = formatSentenceStart(name) + " is " + formula;
+        } else if (currentSet === 'ion-names') {
+          feedback = formula + charge + " is " + name;
+        } else if (currentSet === 'compound-names') {
+          feedback = formula + " is " + name;
+        }
+      }
+
+      feedbackMessage.innerHTML = feedback;
+    }
+
+    // Function to capitalize the first letter of a string
+    function formatSentenceStart(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    // Function to select a mode and update button styles
+    function selectMode(mode) {
+      currentMode = mode;
+
+      // Hide the Time Attack section when resetting button styles
+      timeAttackSection.style.display = 'none';
+
+      // Reset styles for all buttons
+      endlessButton.style.backgroundColor = '#1d91b3';
+      timeAttackButton.style.backgroundColor = '#1d91b3';
+      quizButton.style.backgroundColor = '#1d91b3';
+
+      // Reset input text boxes
+      document.getElementById('formula-input').value = '';
+      document.getElementById('charge-input').value = '';
+      document.getElementById('name-input').value = '';
+
+      // Reset the current score counter
+      resetScores();
+
+      // Set the selected mode's button style
+      if (mode === 'endless') {
+        endlessButton.style.backgroundColor = '#0c3868';
+        nextQuestion();
+        showQuestions();
+      } else if (mode === 'time-attack') {
+        timeAttackButton.style.backgroundColor = '#0c3868';
+        resetTimeAttack();
+      } else if (mode === 'quiz') {
+        quizButton.style.backgroundColor = '#0c3868';
+      }
+
+      // Here you can add code to perform actions based on the selected mode
+      // For example, you can change the game mode.
+      // Add logic here...
+    }
+
+    // Initialize the default mode
+    selectMode('endless');
+
+
+    function getMagnitude(charge) {
+      if (charge === '+' || charge === '-') {
+        return 1;
+      } else if (charge === '2+' || charge === '2-') {
+        return 2;
+      } else if (charge === '3+' || charge === '3-') {
+        return 3;
+      } else {
+        // Handle other cases or return an appropriate value
+        return 0;
+      }
+    }
+
+    function nextQuestion() {
+      currentQuestion = selectNextQuestion();
+      displayQuestion(currentQuestion);
+
+      nextButton.style.display = "none";
+      checkButton.style.display = "inline";
+
+      formulaInput.value = "";
+      chargeInput.value = "";
+      nameInput.value = "";
+
+      setFocus();
+    }
+
+    function selectNextQuestion() {
+      if (currentSet === 'compound-formula' || currentSet === 'compound-names' || currentSet === 'combining-ions') {
+        return randomIonicFormula();
+      } else {
+        return randomIon();
+      }
+    }
+
+    function randomIon() {
+      shuffleArray(ions);
+      let selectedIon = null;
+
+      // Iterate through the shuffled ions to find a suitable ion
+      for (let i = 0; i < ions.length; i++) {
+        const ion = ions[i];
+
+        if (!ion.turnsUntilNextQuestion || ion.turnsUntilNextQuestion <= 0) {
+          selectedIon = ion;
+          break;
+        }
+
+        // Decrease turnsUntilNextQuestion for all ions
+        if (ion.turnsUntilNextQuestion > 0) {
+          ion.turnsUntilNextQuestion--;
+        }
+      }
+
+      // If a suitable ion was found, return its details
+      if (selectedIon) {
+        return {
+          name: selectedIon.name,
+          formula: selectedIon.formula,
+          charge: selectedIon.charge,
+        };
+      }
+
+      // Return null if no suitable ion was found
+      return null;
+    }
+
+    function randomIonicFormula() {
+      const cations = ions.filter(ion => ion.type === 'cation' && ion.name !== "hydrogen");
+      const anions = ions.filter(ion => ion.type === 'anion' && !isForbiddenPair(cations, ion));
+      const cationIndex = getRandomIndex(cations.length);
+      const anionIndex = getRandomIndex(anions.length);
+
+      const cation = cations[cationIndex];
+      const anion = anions[anionIndex];
+
+      const cationMagnitude = getMagnitude(cation.charge);
+      const anionMagnitude = getMagnitude(anion.charge);
+
+      let formula;
+      let cationModifiedFormula;
+      let anionModifiedFormula;
+
+      if (cationMagnitude === anionMagnitude) {
+        // Same magnitudes, simple formula
+        formula = `${cation.formula}${anion.formula}`;
+      } else {
+        // Different magnitudes, more complex formula
+        if (anionMagnitude === 1) {
+          cationModifiedFormula = cation.formula;
+        } else if (cation.polyatomic) {
+          cationModifiedFormula = `(${cation.formula})${anionMagnitude}`;
+        } else {
+          cationModifiedFormula = `${cation.formula}${anionMagnitude}`;
+        }
+
+        if (cationMagnitude === 1) {
+          anionModifiedFormula = anion.formula;
+        } else if (anion.polyatomic) {
+          anionModifiedFormula = `(${anion.formula})${cationMagnitude}`;
+        } else {
+          anionModifiedFormula = `${anion.formula}${cationMagnitude}`;
+        }
+
+        formula = `${cationModifiedFormula}${anionModifiedFormula}`;
+      }
+
+      let cationFormula = cation.formula;
+      let cationCharge = cation.charge;
+      let anionFormula = anion.formula;
+      let anionCharge = anion.charge;
+
+      // Combine the cation's name and anion's name with a space in between
+      const name = `${cation.name} ${anion.name}`;
+
+      return { name, formula, cationFormula, cationCharge, anionFormula, anionCharge };
+    }
+
+    function isForbiddenPair(cations, anion) {
+      const forbiddenPairs = [
+      { cation: "silver", anion: "hydroxide" },
+      { cation: "ammonium", anion: "hydroxide" },
+      // Add more forbidden pairs if needed
+      ];
+
+      return forbiddenPairs.some(pair => cations.some(cation => cation.name === pair.cation) && anion.name === pair.anion);
+    }
+
+    function getRandomIndex(max) {
+      return Math.floor(Math.random() * max);
+    }
+
+    function displayQuestion(data) {
+      feedbackMessage.innerHTML = ""; // Clear previous feedback
+      ionName.innerHTML = generateQuestion(data, currentSet);
+    }
+
+    function generateQuestion(data, currentSet) {
+      if (currentSet === 'ion-symbols') {
+        return `Write the formula for the ${data.name} ion:`;
+      } else if (currentSet === 'ion-names') {
+        return `Write the name for the ${formatSubscripts(data.formula)}${formatSuperscripts(data.charge)} ion:`;
+      } else if (currentSet === 'combining-ions') {
+        return `Write the formula for ${data.name}<br><span style="font-size: 30px;">${formatSubscripts(data.cationFormula)}${formatSuperscripts(data.cationCharge)} and ${formatSubscripts(data.anionFormula)}${formatSuperscripts(data.anionCharge)}</span>`;
+      } else if (currentSet === 'compound-formula') {
+        return `Write the formula for ${data.name}:`;
+      } else if (currentSet === 'compound-names') {
+        return `Write the name for ${formatSubscripts(data.formula)}:`;
+      }
+    }
+
+    // Function to toggle the periodic table visibility
+    function togglePeriodicTable() {
+      const periodicTableContainer = document.getElementById("periodic-table-container");
+      periodicTableContainer.style.display = periodicTableContainer.style.display === "none" ? "block" : "none";
+    }
+
+    function formatSubscripts(input) {
+      return input.replace(/(\d+)/g, "<sub>$1</sub>");
+    }
+
+    function formatSuperscripts(input) {
+      return `<sup>${input}</sup>`;
+    }
+
+    document.addEventListener("keydown", function (event) {
+      console.log(questionsContainer.style.display);
+      if (event.key === "Enter" && questionsContainer.style.display === "block") {
+        if (checkButton.style.display === "inline") {
+          // If the "Check" button is visible and Enter key is pressed, trigger the "Check" button click
+          checkButton.click();
+        } else if (nextButton.style.display === "inline") {
+          // If the "Next" button is visible and Enter key is pressed, trigger the "Next" button click
+          nextButton.click();
+          formulaInput.focus();
+        }
+      }
+    });
+
+    // Start the game
+    // selectQuestionSet();
+  </script>
+</body>
+</html>
